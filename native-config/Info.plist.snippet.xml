@@ -1,0 +1,5 @@
+<!-- Add to ios/PlantDoctor/Info.plist -->
+<key>NSCameraUsageDescription</key>
+<string>Plant Doctor uses your camera to scan leaves and detect plant diseases.</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Plant Doctor needs access to your photos to analyze uploaded plant images.</string>

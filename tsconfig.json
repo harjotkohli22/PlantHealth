@@ -1,0 +1,11 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "jsx": "react-native",
+    "moduleResolution": "node"
+  },
+  "include": ["src", "App.tsx", "index.js"]
+}
