@@ -23,7 +23,7 @@ class PlantClassifier {
 
     this.loading = loadTensorflowModel(
       require('../assets/plant_disease_model.tflite'),
-      'android-gpu', // falls back to CPU automatically if unavailable
+      'default',
     ).then((m) => {
       this.model = m;
       return m;

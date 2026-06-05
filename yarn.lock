@@ -1917,6 +1917,13 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
+"@types/jpeg-js@^0.3.7":
+  version "0.3.7"
+  resolved "http://qa.registry.amurahealth.com/@types%2fjpeg-js/-/jpeg-js-0.3.7.tgz#efe18ac0078c09bae5fa1d58941b53799e7bbf1c"
+  integrity sha512-v3FEzt2TXOOIgvwwOqMoeEhqYqUoK4wcV/K7JbKj8CzwDE9sSuor8EZpSJKaOnuEtyO0W+Nd2uKk8MbtusYpEg==
+  dependencies:
+    jpeg-js "*"
+
 "@types/json-schema@^7.0.9":
   version "7.0.15"
   resolved "http://qa.registry.amurahealth.com/@types%2fjson-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
@@ -4724,6 +4731,11 @@ joi@^17.2.1:
     "@sideway/address" "^4.1.5"
     "@sideway/formula" "^3.0.1"
     "@sideway/pinpoint" "^2.0.0"
+
+jpeg-js@*, jpeg-js@^0.4.4:
+  version "0.4.4"
+  resolved "http://qa.registry.amurahealth.com/jpeg-js/-/jpeg-js-0.4.4.tgz#a9f1c6f1f9f0fa80cdb3484ed9635054d28936aa"
+  integrity sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"

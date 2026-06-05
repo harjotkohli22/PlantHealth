@@ -3,6 +3,7 @@ import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RootNavigator from './src/navigation/RootNavigator';
+import { HistoryProvider } from './src/contexts/HistoryContext';
 import { classifier } from './src/services/classifier';
 import { colors } from './src/theme';
 
@@ -16,7 +17,9 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
-        <RootNavigator />
+        <HistoryProvider>
+          <RootNavigator />
+        </HistoryProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

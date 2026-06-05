@@ -16,12 +16,22 @@ export default function ResultScreen({ navigation, route }: any) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const lowConfidence = confidence < 0.6;
+  const confidenceWarning = (() => {
+    if (confidence >= 0.6) return null;
+    if (info.healthy) {
+      return confidence < 0.35
+        ? `⚠️ Very low confidence — the model couldn't clearly assess your ${info.crop}. Try a well-lit, close-up photo of the leaves.`
+        : `⚠️ Low confidence — your ${info.crop} may be healthy, but a clearer photo will give a more reliable result.`;
+    }
+    return confidence < 0.35
+      ? `⚠️ Very low confidence — possible ${info.name} on ${info.crop}, but the model is uncertain. Retake with better lighting and focus on the affected area.`
+      : `⚠️ Low confidence — possible ${info.name} detected. Try a clearer, well-lit photo of the affected ${info.crop} leaf.`;
+  })();
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Image source={{ uri }} style={styles.hero} />
+        <Image resizeMode="contain" source={{ uri }} style={styles.hero} />
 
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
@@ -37,11 +47,7 @@ export default function ResultScreen({ navigation, route }: any) {
             <Text style={styles.confValue}>{Math.round(confidence * 100)}%</Text>
           </View>
           <ConfidenceBar value={confidence} />
-          {lowConfidence && (
-            <Text style={styles.warn}>
-              ⚠️ Low confidence — try a clearer, well-lit photo of a single affected leaf.
-            </Text>
-          )}
+          {confidenceWarning && <Text style={styles.warn}>{confidenceWarning}</Text>}
         </Card>
 
         <Card>
@@ -75,7 +81,9 @@ export default function ResultScreen({ navigation, route }: any) {
           <Text style={styles.sectionTitle}>Other possibilities</Text>
           {topK.slice(1).map((t) => (
             <View key={t.label} style={styles.altRow}>
-              <Text style={styles.altName}>{t.label.replace(/___/g, ' · ').replace(/_/g, ' ')}</Text>
+              <Text style={styles.altName}>
+                {t.label.replace(/___/g, ' · ').replace(/_/g, ' ')}
+              </Text>
               <Text style={styles.altPct}>{Math.round(t.confidence * 100)}%</Text>
             </View>
           ))}
@@ -105,7 +113,12 @@ const styles = StyleSheet.create({
   confLabel: { color: colors.textDim, fontSize: font.small },
   confValue: { color: colors.primary, fontSize: font.body, fontWeight: '800' },
   warn: { color: colors.warn, fontSize: font.small, marginTop: spacing.md, lineHeight: 18 },
-  sectionTitle: { color: colors.text, fontSize: font.h3, fontWeight: '700', marginBottom: spacing.sm },
+  sectionTitle: {
+    color: colors.text,
+    fontSize: font.h3,
+    fontWeight: '700',
+    marginBottom: spacing.sm,
+  },
   body: { color: colors.textDim, fontSize: font.body, lineHeight: 22, flex: 1 },
   li: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm, alignItems: 'flex-start' },
   liBullet: {

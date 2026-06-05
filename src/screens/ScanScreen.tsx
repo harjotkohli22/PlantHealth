@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  Camera,
-  useCameraDevice,
-  useCameraPermission,
-} from 'react-native-vision-camera';
+import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { colors, spacing, radius, font } from '../theme';
 import { Button } from '../components/ui';
@@ -61,6 +57,8 @@ export default function ScanScreen({ navigation, route }: any) {
       const tensor = await imageFileToTensor(asset.uri);
       const result = await classifier.classify(tensor);
       navigation.navigate('Result', { uri: asset.uri, prediction: result });
+    } catch {
+      alert('Failed to analyze the image. Please try again.');
     } finally {
       setBusy(false);
     }
@@ -116,11 +114,7 @@ export default function ScanScreen({ navigation, route }: any) {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.shutter} onPress={capture} disabled={busy}>
-          {busy ? (
-            <ActivityIndicator color="#08130C" />
-          ) : (
-            <View style={styles.shutterInner} />
-          )}
+          {busy ? <ActivityIndicator color="#08130C" /> : <View style={styles.shutterInner} />}
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.sideBtn} onPress={() => setLive((v) => !v)}>
