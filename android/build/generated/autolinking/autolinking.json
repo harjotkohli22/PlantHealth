@@ -9,7 +9,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "/Users/harjotsingh/Downloads/PlantDoctor/node_modules/@react-native-async-storage/async-storage/RNCAsyncStorage.podspec",
-          "version": "2.2.0",
+          "version": "2.1.0",
           "configurations": [],
           "scriptPhases": []
         },
@@ -83,7 +83,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "/Users/harjotsingh/Downloads/PlantDoctor/node_modules/react-native-gesture-handler/RNGestureHandler.podspec",
-          "version": "2.31.2",
+          "version": "2.21.2",
           "configurations": [],
           "scriptPhases": []
         },
@@ -136,7 +136,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "/Users/harjotsingh/Downloads/PlantDoctor/node_modules/react-native-reanimated/RNReanimated.podspec",
-          "version": "3.19.5",
+          "version": "3.16.7",
           "configurations": [],
           "scriptPhases": []
         },
@@ -161,7 +161,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "/Users/harjotsingh/Downloads/PlantDoctor/node_modules/react-native-safe-area-context/react-native-safe-area-context.podspec",
-          "version": "5.8.0",
+          "version": "5.1.0",
           "configurations": [],
           "scriptPhases": []
         },
@@ -189,7 +189,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "/Users/harjotsingh/Downloads/PlantDoctor/node_modules/react-native-screens/RNScreens.podspec",
-          "version": "4.25.2",
+          "version": "4.4.0",
           "configurations": [],
           "scriptPhases": []
         },
@@ -210,12 +210,7 @@
             "RNSScreenComponentDescriptor",
             "RNSScreenFooterComponentDescriptor",
             "RNSScreenContentWrapperComponentDescriptor",
-            "RNSModalScreenComponentDescriptor",
-            "RNSTabsHostComponentDescriptor",
-            "RNSSafeAreaViewComponentDescriptor",
-            "RNSStackScreenComponentDescriptor",
-            "RNSStackHeaderConfigComponentDescriptor",
-            "RNSStackHeaderSubviewComponentDescriptor"
+            "RNSModalScreenComponentDescriptor"
           ],
           "cmakeListsPath": "/Users/harjotsingh/Downloads/PlantDoctor/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
@@ -231,7 +226,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "/Users/harjotsingh/Downloads/PlantDoctor/node_modules/react-native-svg/RNSVG.podspec",
-          "version": "15.15.5",
+          "version": "15.10.1",
           "configurations": [],
           "scriptPhases": []
         },
@@ -623,10 +618,6 @@
           "description": "Force CocoaPods installation"
         },
         {
-          "name": "--only-pods",
-          "description": "Only install Cocoapods, do not build the app"
-        },
-        {
           "name": "--device [string]",
           "description": "Explicitly set the device to use by name or by unique device identifier . If the value is not provided,the app will run on the first available physical device."
         }
@@ -681,10 +672,6 @@
         {
           "name": "--force-pods",
           "description": "Force CocoaPods installation"
-        },
-        {
-          "name": "--only-pods",
-          "description": "Only install Cocoapods, do not build the app"
         },
         {
           "name": "--device [string]",
