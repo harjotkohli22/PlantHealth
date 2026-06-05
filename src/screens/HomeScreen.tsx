@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, radius, font } from '../theme';
 import { Card, Button, SeverityBadge } from '../components/ui';
 import { useHistory } from '../hooks/useHistory';
+import { getDiseaseInfo } from '../services/diseaseData';
 
 export default function HomeScreen({ navigation }: any) {
   const { records } = useHistory();
@@ -62,14 +63,26 @@ export default function HomeScreen({ navigation }: any) {
           </Card>
         ) : (
           recent.map((r) => (
-            <Card key={r.id} style={styles.recentCard}>
-              <Image source={{ uri: r.uri }} style={styles.thumb} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.recentCrop}>{r.crop}</Text>
-                <Text style={styles.recentName}>{r.name}</Text>
-              </View>
-              <SeverityBadge severity={r.severity as any} />
-            </Card>
+            <TouchableOpacity
+              key={r.id}
+              activeOpacity={0.75}
+              onPress={() => {
+                const info = getDiseaseInfo(r.label ?? `${r.crop}___${r.name}`);
+                navigation.navigate('Result', {
+                  uri: r.uri,
+                  prediction: { info, confidence: r.confidence, topK: r.topK ?? [] },
+                  saveToHistory: false,
+                });
+              }}>
+              <Card style={styles.recentCard}>
+                <Image source={{ uri: r.uri }} style={styles.thumb} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.recentCrop}>{r.crop}</Text>
+                  <Text style={styles.recentName}>{r.name}</Text>
+                </View>
+                <SeverityBadge severity={r.severity as any} />
+              </Card>
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>

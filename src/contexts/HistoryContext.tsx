@@ -21,6 +21,7 @@ interface HistoryContextValue {
   records: ScanRecord[];
   loaded: boolean;
   add: (uri: string, p: Prediction) => ScanRecord;
+  remove: (id: string) => void;
   clear: () => void;
 }
 
@@ -62,10 +63,15 @@ export function HistoryProvider({ children }: { children: React.ReactNode }) {
     [records, persist],
   );
 
+  const remove = useCallback(
+    (id: string) => persist(records.filter((r) => r.id !== id)),
+    [records, persist],
+  );
+
   const clear = useCallback(() => persist([]), [persist]);
 
   return (
-    <HistoryContext.Provider value={{ records, loaded, add, clear }}>
+    <HistoryContext.Provider value={{ records, loaded, add, remove, clear }}>
       {children}
     </HistoryContext.Provider>
   );
