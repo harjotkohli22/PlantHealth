@@ -1,6 +1,31 @@
-# 🌿 Plant Doctor
+# 🌿 plant-health-lib
 
-On-device plant disease detection for React Native CLI. Point the camera at a leaf (or upload a photo) and a quantized TFLite model classifies 38+ crop diseases — fully offline, no backend.
+A comprehensive React Native library for on-device plant disease detection. Point the camera at a leaf (or upload a photo) and a quantized TFLite model classifies 38+ crop diseases — fully offline, no backend.
+
+## Installation
+
+```bash
+npm install plant-health-lib
+# or
+yarn add plant-health-lib
+```
+
+## Quick Start
+
+```typescript
+import { useFrameClassifier, useHistory } from 'plant-health-lib/hooks';
+import { getDiseaseInfo } from 'plant-health-lib/services';
+import { classifyImage } from 'plant-health-lib/utils';
+```
+
+## Features
+
+- ✅ **38+ Disease Classes** – Comprehensive crop disease database
+- ✅ **TensorFlow Lite Integration** – Fast GPU-accelerated inference
+- ✅ **Live Camera Detection** – Real-time classification from camera frames
+- ✅ **Offline Operation** – No backend required, fully on-device
+- ✅ **TypeScript Support** – Full type safety included
+- ✅ **History Tracking** – AsyncStorage-backed scan history
 
 ## Stack
 
@@ -37,42 +62,106 @@ src/
 
 **Two inference paths:** live camera frames run through the GPU resize plugin inside a worklet (fast, ~1 fps throttled); still captures/uploads go through `imageToTensor`. Both feed the same `classifier.classify()`.
 
-## Setup
+## Usage
 
-```bash
-# 1. Scaffold (if starting fresh) then drop these files in
-npx @react-native-community/cli init PlantDoctor
-# copy src/, App.tsx, index.js, configs over
+### Using the Frame Classifier Hook (Live Camera)
 
-# 2. Install deps
-npm install
+```typescript
+import { useFrameClassifier } from 'plant-health-lib/hooks';
+import { getDiseaseInfo } from 'plant-health-lib/services';
 
-# 3. Add the model
-#    Put your classifier at src/assets/plant_disease_model.tflite
-#    (see src/assets/README.md for how to train/convert one)
+export function ScanComponent() {
+  const { classify, isLoading, lastResult } = useFrameClassifier();
 
-# 4. iOS pods
-npm run pods
+  useEffect(() => {
+    if (lastResult) {
+      const disease = getDiseaseInfo(lastResult.label);
+      console.log(`Detected: ${disease.name} (${lastResult.confidence}%)`);
+    }
+  }, [lastResult]);
 
-# 5. Permissions
-#    Android: merge native-config/AndroidManifest.snippet.xml
-#    iOS:     merge native-config/Info.plist.snippet.xml
-
-# 6. Run
-npm run android   # or: npm run ios
+  return (
+    <CameraView
+      onFrame={(frame) => classify(frame)}
+      // ... camera props
+    />
+  );
+}
 ```
 
-## The model
+### Using the History Hook
 
-The app expects `src/assets/plant_disease_model.tflite`:
+```typescript
+import { useHistory } from 'plant-health-lib/hooks';
+
+const { scans, addScan, clearHistory } = useHistory();
+```
+
+### Classifying Images
+
+```typescript
+import { classifyImage } from 'plant-health-lib/utils';
+import { classifier } from 'plant-health-lib/services';
+
+const result = await classifyImage(imagePath);
+// result: { label: string; confidence: number; }
+```
+
+## API Reference
+
+### Hooks
+
+- **`useFrameClassifier()`** – Real-time frame classification from camera
+  - Returns: `{ classify(frame), isLoading, lastResult }`
+
+- **`useHistory()`** – Manage scan history with AsyncStorage
+  - Returns: `{ scans, addScan(result), clearHistory() }`
+
+### Services
+
+- **`classifier.classify(tensor)`** – Classify a TensorFlow tensor
+- **`getDiseaseInfo(label)`** – Get remedy/prevention data for a disease
+
+### Utils
+
+- **`classifyImage(path)`** – Load and classify a still image from file path
+
+### Components
+
+- **`<UI.Card />`** – Styled card component
+- **`<UI.Button />`** – Button component
+- **`<UI.SeverityBadge />`** – Disease severity indicator
+- **`<UI.ConfidenceBar />`** – Confidence visualization
+
+## Setting Up the Model
+
+The library expects `src/assets/plant_disease_model.tflite`:
 - **Input:** `[1, 224, 224, 3]` float32
-- **Output:** `[1, 38]` (logits or probabilities — the classifier auto-detects and applies softmax if needed)
-- **Labels:** order must match `LABELS` in `src/services/diseaseData.ts`
+- **Output:** `[1, 38]` (logits or probabilities)
+- **Labels:** Must match `LABELS` in `src/services/diseaseData.ts`
 
-Train on the PlantVillage dataset (MobileNetV2/EfficientNet-Lite is a good mobile backbone) and convert with `tf.lite.TFLiteConverter`. Full instructions in `src/assets/README.md`.
+Train on PlantVillage dataset using MobileNetV2 or EfficientNet-Lite, then convert with TFLite converter. See `src/assets/README.md` for details.
 
-## Notes / production hardening
+## Building from Source
 
-- `utils/imageToTensor.ts` uses a dependency-light JS resampler as a fallback; for production swap in a native bitmap decoder (e.g. `@bam.tech/react-native-image-resizer`) for speed and quality.
+```bash
+npm install
+npm run build
+```
+
+The compiled library will be in `lib/`.
+
+## Contributing
+
+We welcome contributions! Please feel free to submit a Pull Request.
+
+## License
+
+MIT
+
+## Notes / Production Hardening
+
+- The remedy text is general guidance — maintain an on-screen disclaimer; it's not a substitute for professional agricultural advice.
+- For production, replace the JS image resampler with a native bitmap decoder for better performance.
 - Tune `MEAN`/`STD` in `classifier.ts` to match your training normalization.
-- The remedy text is general guidance — keep the on-screen disclaimer; it's not a substitute for an agronomist.
+

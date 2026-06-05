@@ -1,14 +1,62 @@
 {
-  "name": "PlantDoctor",
+  "name": "plant-health-lib",
   "version": "1.0.0",
-  "private": true,
+  "description": "A comprehensive React Native library for plant disease detection using TensorFlow Lite",
+  "private": false,
+  "license": "MIT",
+  "author": "Kulwindar Singh",
+  "keywords": [
+    "plant-health",
+    "disease-detection",
+    "react-native",
+    "tflite",
+    "tensorflow",
+    "plant-care",
+    "mobile-vision"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./components": {
+      "types": "./lib/components/index.d.ts",
+      "default": "./lib/components/index.js"
+    },
+    "./hooks": {
+      "types": "./lib/hooks/index.d.ts",
+      "default": "./lib/hooks/index.js"
+    },
+    "./services": {
+      "types": "./lib/services/index.d.ts",
+      "default": "./lib/services/index.js"
+    },
+    "./theme": {
+      "types": "./lib/theme/index.d.ts",
+      "default": "./lib/theme/index.js"
+    },
+    "./utils": {
+      "types": "./lib/utils/index.d.ts",
+      "default": "./lib/utils/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "src",
+    "README.md",
+    "package.json"
+  ],
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
     "pods": "cd ios && pod install && cd ..",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.0",
@@ -44,5 +92,13 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kulwindar_singh/plant-health-lib.git"
+  },
+  "homepage": "https://github.com/kulwindar_singh/plant-health-lib#readme",
+  "bugs": {
+    "url": "https://github.com/kulwindar_singh/plant-health-lib/issues"
   }
 }

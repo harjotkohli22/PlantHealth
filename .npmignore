@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+__tests__/
+*.test.ts
+*.test.tsx
+jest.config.js
+
+# Linting
+eslintrc
+eslintignore
+.eslintrc*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build
+build/
+dist/
+.turbo/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Source control
+.github/
+.gitlab-ci.yml
+
+# Documentation
+docs/
+.md
+
+# Android & iOS
+android/
+ios/
+.expo/
+
+# Environment
+.env*
+.env.local
+
+# Misc
+scripts/
+metro.config.js
+babel.config.js
+app.json
+index.js

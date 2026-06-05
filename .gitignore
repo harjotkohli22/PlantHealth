@@ -1,4 +1,7 @@
 node_modules
+lib/
+dist/
+build/
 
 # Android build artifacts
 android/app/build/
@@ -7,3 +10,25 @@ android/app/.cxx/
 *.apk
 *.aab
 *.so
+
+# iOS
+ios/build/
+ios/Pods/
+*.xcworkspace/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
