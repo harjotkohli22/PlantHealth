@@ -2,10 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, radius, font } from '../theme';
-import { Card, Button, SeverityBadge } from '../components/ui';
+import { Card, SeverityBadge } from '../components/ui';
 import { useHistory } from '../hooks/useHistory';
+import { getDiseaseInfo } from '../services/diseaseData';
 
-export default function HistoryScreen() {
+export default function HistoryScreen({ navigation }: any) {
   const { records, clear } = useHistory();
 
   return (
@@ -30,18 +31,29 @@ export default function HistoryScreen() {
           </Card>
         }
         renderItem={({ item }) => (
-          <Card style={styles.row}>
-            <Image source={{ uri: item.uri }} style={styles.thumb} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.crop}>{item.crop}</Text>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.date}>
-                {new Date(item.date).toLocaleDateString()} ·{' '}
-                {Math.round(item.confidence * 100)}%
-              </Text>
-            </View>
-            <SeverityBadge severity={item.severity as any} />
-          </Card>
+          <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={() => {
+              const info = getDiseaseInfo(item.label ?? `${item.crop}___${item.name}`);
+              navigation.navigate('Result', {
+                uri: item.uri,
+                prediction: { info, confidence: item.confidence, topK: item.topK ?? [] },
+                saveToHistory: false,
+              });
+            }}>
+            <Card style={styles.row}>
+              <Image source={{ uri: item.uri }} style={styles.thumb} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.crop}>{item.crop}</Text>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.date}>
+                  {new Date(item.date).toLocaleDateString()} ·{' '}
+                  {Math.round(item.confidence * 100)}%
+                </Text>
+              </View>
+              <SeverityBadge severity={item.severity as any} />
+            </Card>
+          </TouchableOpacity>
         )}
       />
     </SafeAreaView>

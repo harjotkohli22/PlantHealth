@@ -7,11 +7,13 @@ const KEY = '@plantdoctor/history';
 export interface ScanRecord {
   id: string;
   uri: string;
+  label: string;
   crop: string;
   name: string;
   healthy: boolean;
   severity: string;
   confidence: number;
+  topK: { label: string; confidence: number }[];
   date: number;
 }
 
@@ -45,11 +47,13 @@ export function HistoryProvider({ children }: { children: React.ReactNode }) {
       const rec: ScanRecord = {
         id: `${Date.now()}`,
         uri,
+        label: p.info.label,
         crop: p.info.crop,
         name: p.info.name,
         healthy: p.info.healthy,
         severity: p.info.severity,
         confidence: p.confidence,
+        topK: p.topK,
         date: Date.now(),
       };
       persist([rec, ...records].slice(0, 100));

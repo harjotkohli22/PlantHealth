@@ -7,12 +7,16 @@ import { useHistory } from '../hooks/useHistory';
 import type { Prediction } from '../services/classifier';
 
 export default function ResultScreen({ navigation, route }: any) {
-  const { uri, prediction } = route.params as { uri: string; prediction: Prediction };
+  const { uri, prediction, saveToHistory = true } = route.params as {
+    uri: string;
+    prediction: Prediction;
+    saveToHistory?: boolean;
+  };
   const { add } = useHistory();
   const { info, confidence, topK } = prediction;
 
   useEffect(() => {
-    add(uri, prediction);
+    if (saveToHistory) add(uri, prediction);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

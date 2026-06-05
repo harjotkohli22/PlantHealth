@@ -4,26 +4,44 @@ import { useResizePlugin } from 'vision-camera-resize-plugin';
 import { Worklets } from 'react-native-worklets-core';
 import { classifier, MODEL_INPUT_SIZE, Prediction } from '../services/classifier';
 
+// Minimum fraction of pixels with leaf-green hue to consider a leaf in frame.
+const LEAF_GREEN_RATIO = 0.18;
+
 /**
- * Live classification at a throttled rate directly on camera frames.
- * Uses vision-camera-resize-plugin (GPU) to crop+resize on the native side,
- * then hands the buffer to the TFLite model on a worklet thread.
+ * Runs in the worklet thread — no JS bridge.
+ * Counts RGB pixels that fall in the green/yellow-green range typical of leaves.
  */
+function leafGreenRatio(buf: Uint8Array): number {
+  'worklet';
+  let green = 0;
+  const pixels = buf.length / 3;
+  for (let i = 0; i < buf.length; i += 3) {
+    const r = buf[i];
+    const g = buf[i + 1];
+    const b = buf[i + 2];
+    // Green channel must dominate both red and blue, and have enough brightness
+    if (g > r + 15 && g > b + 15 && g > 45 && g < 245) green++;
+  }
+  return green / pixels;
+}
+
 export function useFrameClassifier(enabled: boolean, intervalMs = 1200) {
   const { resize } = useResizePlugin();
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [running, setRunning] = useState(false);
+  const [isPlantDetected, setIsPlantDetected] = useState(false);
 
-  const onResult = Worklets.createRunOnJS((p: Prediction) => {
+  const onResult = Worklets.createRunOnJS((p: Prediction, leafDetected: boolean) => {
     setPrediction(p);
+    setIsPlantDetected(leafDetected);
     setRunning(false);
   });
 
   const runClassify = useCallback(
-    async (buffer: Uint8Array) => {
+    async (buffer: Uint8Array, leafDetected: boolean) => {
       try {
         const p = await classifier.classify(buffer);
-        onResult(p);
+        onResult(p, leafDetected);
       } catch {
         setRunning(false);
       }
@@ -36,7 +54,6 @@ export function useFrameClassifier(enabled: boolean, intervalMs = 1200) {
     (frame) => {
       'worklet';
       if (!enabled) return;
-      // throttle: only sample one frame roughly every intervalMs
       const now = Date.now();
       // @ts-ignore persistent shared value across frames
       if (now - (globalThis.__lastSample ?? 0) < intervalMs) return;
@@ -50,10 +67,14 @@ export function useFrameClassifier(enabled: boolean, intervalMs = 1200) {
         rotation: '90deg',
       });
 
-      runClassifyJS(new Uint8Array(resized.buffer));
+      const buf = new Uint8Array(resized.buffer);
+      const ratio = leafGreenRatio(buf);
+      const leafDetected = ratio >= LEAF_GREEN_RATIO;
+
+      runClassifyJS(buf, leafDetected);
     },
     [enabled, resize, runClassifyJS, intervalMs],
   );
 
-  return { frameProcessor, prediction, running, setRunning };
+  return { frameProcessor, prediction, running, setRunning, isPlantDetected };
 }

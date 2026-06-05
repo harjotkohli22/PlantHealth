@@ -1,5 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withRepeat,
+  withSequence,
+  interpolateColor,
+  Easing,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -8,6 +23,11 @@ import { Button } from '../components/ui';
 import { useFrameClassifier } from '../hooks/useFrameClassifier';
 import { classifier } from '../services/classifier';
 import { imageFileToTensor } from '../utils/imageToTensor';
+import { useState } from 'react';
+
+const RETICLE_SIZE = 260;
+const CORNER_LEN = 28;
+const CORNER_THICK = 3;
 
 export default function ScanScreen({ navigation, route }: any) {
   const uploadMode = route?.params?.mode === 'upload';
@@ -17,7 +37,37 @@ export default function ScanScreen({ navigation, route }: any) {
   const [live, setLive] = useState(!uploadMode);
   const [busy, setBusy] = useState(false);
 
-  const { frameProcessor, prediction, running, setRunning } = useFrameClassifier(live);
+  const { frameProcessor, prediction, running, setRunning, isPlantDetected } =
+    useFrameClassifier(live);
+
+  // 0 = no plant, 1 = plant detected
+  const detected = useSharedValue(0);
+  // 0..1 repeating scan line
+  const scanY = useSharedValue(0);
+
+  useEffect(() => {
+    detected.value = withTiming(isPlantDetected ? 1 : 0, { duration: 400 });
+  }, [isPlantDetected, detected]);
+
+  useEffect(() => {
+    if (!live) return;
+    scanY.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
+      ),
+      -1,
+    );
+  }, [live, scanY]);
+
+  const cornerColor = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(detected.value, [0, 1], ['rgba(255,255,255,0.55)', '#4ade80']),
+  }));
+
+  const scanLineStyle = useAnimatedStyle(() => ({
+    top: scanY.value * RETICLE_SIZE,
+    opacity: live ? 0.55 : 0,
+  }));
 
   useEffect(() => {
     if (!hasPermission) requestPermission();
@@ -38,7 +88,7 @@ export default function ScanScreen({ navigation, route }: any) {
       const tensor = await imageFileToTensor(uri);
       const result = await classifier.classify(tensor);
       navigation.navigate('Result', { uri, prediction: result });
-    } catch (e) {
+    } catch {
       setLive(true);
     } finally {
       setBusy(false);
@@ -78,6 +128,12 @@ export default function ScanScreen({ navigation, route }: any) {
     );
   }
 
+  const hintText = live
+    ? isPlantDetected
+      ? '🌿 Leaf detected — tap to analyze'
+      : 'Center a single leaf in the frame'
+    : 'Live preview paused';
+
   return (
     <View style={styles.root}>
       <Camera
@@ -89,17 +145,27 @@ export default function ScanScreen({ navigation, route }: any) {
         frameProcessor={live ? frameProcessor : undefined}
       />
 
-      {/* focus reticle */}
+      {/* animated corner-bracket reticle */}
       <View style={styles.reticleWrap} pointerEvents="none">
-        <View style={styles.reticle} />
-        <Text style={styles.hint}>Center a single leaf in the frame</Text>
+        <View style={styles.reticleArea}>
+          {/* corners */}
+          <Animated.View style={[styles.corner, styles.tl, cornerColor]} />
+          <Animated.View style={[styles.corner, styles.tr, cornerColor]} />
+          <Animated.View style={[styles.corner, styles.bl, cornerColor]} />
+          <Animated.View style={[styles.corner, styles.br, cornerColor]} />
+
+          {/* scan line */}
+          <Animated.View style={[styles.scanLine, scanLineStyle]} />
+        </View>
+
+        <Text style={styles.hint}>{hintText}</Text>
       </View>
 
       {/* live prediction pill */}
       {live && prediction && (
         <SafeAreaView style={styles.livePillWrap} edges={['top']}>
-          <View style={styles.livePill}>
-            <View style={styles.liveDot} />
+          <View style={[styles.livePill, isPlantDetected && styles.livePillActive]}>
+            <View style={[styles.liveDot, isPlantDetected && styles.liveDotActive]} />
             <Text style={styles.livePillText}>
               {prediction.info.crop} · {prediction.info.name} ·{' '}
               {Math.round(prediction.confidence * 100)}%
@@ -113,8 +179,16 @@ export default function ScanScreen({ navigation, route }: any) {
           <Text style={styles.sideIcon}>🖼️</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.shutter} onPress={capture} disabled={busy}>
-          {busy ? <ActivityIndicator color="#08130C" /> : <View style={styles.shutterInner} />}
+        <TouchableOpacity
+          style={[styles.shutter, isPlantDetected && styles.shutterActive]}
+          onPress={capture}
+          disabled={busy}
+        >
+          {busy ? (
+            <ActivityIndicator color="#08130C" />
+          ) : (
+            <View style={[styles.shutterInner, isPlantDetected && styles.shutterInnerActive]} />
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.sideBtn} onPress={() => setLive((v) => !v)}>
@@ -141,15 +215,64 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
   permText: { color: colors.text, fontSize: font.body, textAlign: 'center' },
-  reticleWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  reticle: {
-    width: 260,
-    height: 260,
-    borderRadius: radius.lg,
-    borderWidth: 2,
-    borderColor: colors.primary,
+
+  reticleWrap: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  reticleArea: {
+    width: RETICLE_SIZE,
+    height: RETICLE_SIZE,
+    overflow: 'hidden',
+  },
+
+  // corner brackets — each is positioned at a corner, L-shaped via border
+  corner: {
+    position: 'absolute',
+    width: CORNER_LEN,
+    height: CORNER_LEN,
+    borderColor: 'rgba(255,255,255,0.55)',
+  },
+  tl: {
+    top: 0,
+    left: 0,
+    borderTopWidth: CORNER_THICK,
+    borderLeftWidth: CORNER_THICK,
+    borderTopLeftRadius: 4,
+  },
+  tr: {
+    top: 0,
+    right: 0,
+    borderTopWidth: CORNER_THICK,
+    borderRightWidth: CORNER_THICK,
+    borderTopRightRadius: 4,
+  },
+  bl: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: CORNER_THICK,
+    borderLeftWidth: CORNER_THICK,
+    borderBottomLeftRadius: 4,
+  },
+  br: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: CORNER_THICK,
+    borderRightWidth: CORNER_THICK,
+    borderBottomRightRadius: 4,
+  },
+
+  scanLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: '#4ade80',
+  },
+
   hint: { color: '#fff', marginTop: spacing.md, fontSize: font.small, opacity: 0.9 },
+
   livePillWrap: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center' },
   livePill: {
     flexDirection: 'row',
@@ -161,8 +284,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     marginTop: spacing.md,
   },
+  livePillActive: { backgroundColor: 'rgba(22,60,30,0.92)' },
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
+  liveDotActive: { backgroundColor: '#4ade80' },
   livePillText: { color: colors.text, fontSize: font.small, fontWeight: '600' },
+
   controls: {
     position: 'absolute',
     bottom: 0,
@@ -193,7 +319,15 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: 'rgba(255,255,255,0.4)',
   },
+  shutterActive: {
+    borderColor: '#4ade80',
+    shadowColor: '#4ade80',
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
+  },
   shutterInner: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primary },
+  shutterInnerActive: { backgroundColor: '#16a34a' },
   analyzing: {
     position: 'absolute',
     alignSelf: 'center',

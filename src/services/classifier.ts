@@ -8,9 +8,6 @@ export interface Prediction {
 }
 
 const MODEL_INPUT_SIZE = 224; // model expects 224x224x3
-// PlantVillage / ImageNet style normalization. Adjust to match your training.
-const MEAN = [0.485, 0.456, 0.406];
-const STD = [0.229, 0.224, 0.225];
 
 class PlantClassifier {
   private model: TensorflowModel | null = null;
@@ -63,8 +60,7 @@ class PlantClassifier {
   private normalize(rgb: Float32Array | Uint8Array): Float32Array {
     const out = new Float32Array(MODEL_INPUT_SIZE * MODEL_INPUT_SIZE * 3);
     for (let i = 0; i < out.length; i++) {
-      const c = i % 3;
-      out[i] = (rgb[i] / 255 - MEAN[c]) / STD[c];
+      out[i] = rgb[i] / 255;
     }
     return out;
   }
