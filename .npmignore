@@ -37,9 +37,10 @@ dist/
 .github/
 .gitlab-ci.yml
 
-# Documentation
+# Documentation (but keep README.md)
 docs/
-.md
+*.md
+!README.md
 
 # Android & iOS
 android/

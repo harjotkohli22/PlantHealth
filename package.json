@@ -1,6 +1,6 @@
 {
   "name": "plant-health-lib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A comprehensive React Native library for plant disease detection using TensorFlow Lite",
   "private": false,
   "license": "MIT",
@@ -40,6 +40,14 @@
     "./utils": {
       "types": "./lib/utils/index.d.ts",
       "default": "./lib/utils/index.js"
+    },
+    "./screens": {
+      "types": "./lib/screens/index.d.ts",
+      "default": "./lib/screens/index.js"
+    },
+    "./UI": {
+      "types": "./lib/UI.d.ts",
+      "default": "./lib/UI.js"
     }
   },
   "files": [

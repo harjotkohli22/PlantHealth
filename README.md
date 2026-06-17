@@ -12,6 +12,28 @@ yarn add plant-health-lib
 
 ## Quick Start
 
+### Complete UI (One-liner setup)
+
+```typescript
+import { UI } from 'plant-health-lib';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <UI.HistoryProvider>
+          <UI.RootNavigator />
+        </UI.HistoryProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+```
+
+### Building Custom UI
+
 ```typescript
 import { useFrameClassifier, useHistory } from 'plant-health-lib/hooks';
 import { getDiseaseInfo } from 'plant-health-lib/services';
@@ -63,6 +85,41 @@ src/
 **Two inference paths:** live camera frames run through the GPU resize plugin inside a worklet (fast, ~1 fps throttled); still captures/uploads go through `imageToTensor`. Both feed the same `classifier.classify()`.
 
 ## Usage
+
+### Using the Complete UI (Recommended)
+
+The library exports complete screens ready to use. Just wrap your app with the providers:
+
+```typescript
+import { UI } from 'plant-health-lib';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <UI.HistoryProvider>
+          <UI.RootNavigator />
+        </UI.HistoryProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+```
+
+### Using Individual Screens
+
+```typescript
+import { 
+  HomeScreen, 
+  ScanScreen, 
+  ResultScreen, 
+  HistoryScreen, 
+  RootNavigator,
+  HistoryProvider 
+} from 'plant-health-lib/screens';
+```
 
 ### Using the Frame Classifier Hook (Live Camera)
 
@@ -128,10 +185,29 @@ const result = await classifyImage(imagePath);
 
 ### Components
 
-- **`<UI.Card />`** – Styled card component
-- **`<UI.Button />`** – Button component
-- **`<UI.SeverityBadge />`** – Disease severity indicator
-- **`<UI.ConfidenceBar />`** – Confidence visualization
+- **`<Card />`** – Styled card component
+- **`<Button />`** – Button component
+- **`<SeverityBadge />`** – Disease severity indicator
+- **`<ConfidenceBar />`** – Confidence visualization
+
+### UI Screens (from `plant-health-lib/screens` or `plant-health-lib/UI`)
+
+- **`RootNavigator`** – Complete navigation stack (Home → Scan → Result → History)
+- **`HomeScreen`** – Dashboard with scan entry points and recent scans
+- **`ScanScreen`** – Live camera detection UI
+- **`ResultScreen`** – Diagnosis, treatment, and prevention display
+- **`HistoryScreen`** – Saved scans list
+
+### UI Convenience Module
+
+```typescript
+import { UI } from 'plant-health-lib';
+
+// UI.HistoryProvider - Context provider for history management
+// UI.RootNavigator - Full app navigator
+// UI.HomeScreen, UI.ScanScreen, UI.ResultScreen, UI.HistoryScreen
+// UI.useHistory, UI.useFrameClassifier, UI.classifier, UI.getDiseaseInfo
+```
 
 ## Setting Up the Model
 
